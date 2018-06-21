@@ -10,6 +10,6 @@ Download the wikipedia data dumps for English and French from https://dumps.wiki
  
 2. For cross-lingual document retrieval system:
 
-Using thw cross-lingual word vectors obtained above, compute the average of word vectors occuring in a single article inorder to get a vector that represents the article - run wiki_compute.py using the files in /data.
+Using the cross-lingual word vectors obtained above, compute the average of word vectors occuring in a single article inorder to get a vector that represents the article - run wiki_compute.py using the files in /data.
  Hence obtain document vectors for English as well as French wikipedia docs. (in /results)
  Visualize a particular query for an article (in eng) and its k nearest neighbors (in fr) - run wiki2viz.py
