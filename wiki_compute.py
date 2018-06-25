@@ -15,7 +15,7 @@ def is_ascii(s):
     return all(ord(c) < 128 for c in s)
 
 
-tree = ET.parse('enwiki.xml')
+tree = ET.parse('data/enwiki.xml')
 root = tree.getroot()
 
 articles_and_titles = []
@@ -100,7 +100,7 @@ nmax = 500000
 vectors = []
 word2id = {}
 words = []
-with io.open('wiki.multi.en.vec', 'r', encoding='utf-8', newline='\n', errors='ignore') as f:
+with io.open('data/wiki.multi.en.vec', 'r', encoding='utf-8', newline='\n', errors='ignore') as f:
     next(f)
     for i, line in enumerate(f):
         word, vect = line.rstrip().split(' ', 1)
@@ -140,7 +140,7 @@ print len(X_title)
 
 #sentence vectors to file
 X_stack = np.vstack(X)               
-with open('english.vec','a') as f:
+with open('results/english.vec','a') as f:
     for t1,x1 in zip(X_title,X_stack):
         f.write(t1.encode("utf-8"))
         f.write('~')
@@ -156,5 +156,4 @@ with open('english.vec','a') as f:
 
        
     
-
 
