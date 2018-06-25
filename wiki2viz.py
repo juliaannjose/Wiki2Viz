@@ -29,8 +29,8 @@ def load_vec(emb_path, nmax=50000):
     return embeddings, id2word, word2id
 
 
-src_path = 'english.vec'
-tgt_path = 'french.vec'
+src_path = 'results/english.vec'
+tgt_path = 'results/french.vec'
 nmax = 50000  # maximum number of word embeddings to load
 
 src_embeddings, src_id2word, src_word2id = load_vec(src_path, nmax)
@@ -50,7 +50,7 @@ def get_nn(word, src_emb, src_id2word, tgt_emb, tgt_id2word, K=3):
         t_w.append(tgt_id2word[idx])
 
 src_word = raw_input('Search for an article: ')
-with open('english.vec', 'r') as f:
+with open('results/english.vec', 'r') as f:
     for line in f:
         word1 = line.rstrip().split('~')
         w = word1[0]
@@ -98,5 +98,4 @@ def plot_similar_word(src_words, src_word2id, src_emb, tgt_words, tgt_word2id, t
 
 tgt_words = t_w
 plot_similar_word(tgt_words, tgt_word2id, tgt_embeddings, pca)
-
 
