@@ -6,7 +6,7 @@ Creating a cross-lingual document retrieval system
 Download the wikipedia data dumps for English and French from https://dumps.wikimedia.org/.
  Use facebook's fastText to obtain monolingual word vectors from these dump files.
  Use facebook's MUSE to obtain cross-lingual word vectors (for Eng and Fr).
- Place these in /data and run Eng_to_Fr.py.
+ Run Eng_to_Fr.py.
  
 2. For cross-lingual document retrieval system:
 
