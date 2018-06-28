@@ -2,12 +2,13 @@
 import io
 import numpy as np
 from bokeh.plotting import figure, output_file, show
-from bokeh.models import ColumnDataSource, LabelSet, Label, CustomJS, OpenURL, TapTool, Range1d
+from bokeh.models import ColumnDataSource, LabelSet, Label, CustomJS, OpenURL, TapTool, Range1d, HoverTool
 from bokeh.plotting import figure, output_file, show
-from bokeh.layouts import widgetbox
-from bokeh.models.widgets import TextInput
-from bokeh.layouts import row
+from bokeh.layouts import layout, widgetbox, row
+from bokeh.models.widgets import TextInput, Slider
 from sklearn.decomposition import PCA
+
+from bokeh.io import curdoc
 
 output_file("DocRetrieval.html")
 
@@ -29,46 +30,102 @@ def load_vec(emb_path, nmax=50000):
     return embeddings, id2word, word2id
 
 
-src_path = 'results/english.vec'
-tgt_path = 'results/french.vec'
+src_path = 'eng_titles.vec' 
+tgt_path = 'french_titles.vec'
 nmax = 50000  # maximum number of word embeddings to load
 
 src_embeddings, src_id2word, src_word2id = load_vec(src_path, nmax)
 tgt_embeddings, tgt_id2word, tgt_word2id = load_vec(tgt_path, nmax)
-t_w = []
-
-#getting k nearest neighbors
-def get_nn(word, src_emb, src_id2word, tgt_emb, tgt_id2word, K=3):
-    print("Nearest neighbors of \"%s\":" % word)
-    word2id = {v: k for k, v in src_id2word.items()}
-    wd = word.decode('utf-8')
-    word_emb = src_emb[word2id[wd]]
-    scores = (tgt_emb / np.linalg.norm(tgt_emb, 2, 1)[:, None]).dot(word_emb / np.linalg.norm(word_emb))
-    k_best = scores.argsort()[-K:][::-1]
-    for i, idx in enumerate(k_best):
-        print('%.4f - %s' % (scores[idx], tgt_id2word[idx]))
-        t_w.append(tgt_id2word[idx])
-
-src_word = raw_input('Search for an article: ')
-with open('results/english.vec', 'r') as f:
-    for line in f:
-        word1 = line.rstrip().split('~')
-        w = word1[0]
-        if src_word in w:
-            get_nn(w, src_embeddings, src_id2word, tgt_embeddings, tgt_id2word, K=3)
-
-#Visualize cross lingual embeddings using PCA
-pca = PCA(n_components=2, whiten=True)  
-pca.fit(np.vstack([tgt_embeddings]))
 
 
-def plot_similar_word(src_words, src_word2id, src_emb, tgt_words, tgt_word2id, tgt_emb, pca):
+user_query = TextInput(value = 'football', title="Search for an article: ")
+no_of_articles = Slider(title="Number of articles", start=1, end=50, value=3, step=1)
 
+source = ColumnDataSource(data = dict(x=[],y=[],names=[])) 
+hover = HoverTool(
+        tooltips=[
+            ("Title", "@names"),
+        ]
+)
+p1= figure(plot_width = 1200, plot_height = 600, tools=[hover,'tap','reset','box_zoom'], title="Click to view")
+p1.circle('x','y',source = source, alpha = 0.6,size=8, color = 'red')  
+
+url = "https://fr.wikipedia.org/wiki/@names"
+taptool = p1.select(type=TapTool)
+taptool.callback = OpenURL(url=url)
+
+p1.x_range = Range1d(-10,10)
+p1.y_range = Range1d(-10, 10)
+# p1.add_layout(labels1)
+#layout = row(p1, user_query)
+#show(layout)  
+
+def select_articles():
+    s_w = " "
+    g = 1
+    K = no_of_articles.value
+    u = user_query.value
+    src_word = u.encode('utf-8')
+    src_word = src_word.lower()
+    src_word = src_word.replace('–',' ')
+    src_word = src_word.replace('-',' ')
+    with open('eng_titles.vec', 'r') as f:
+        for line in f:
+            word1 = line.rstrip().split('~')
+            w = word1[0]
+            if src_word in w:
+                #get_nn(w, src_embeddings, src_id2word, tgt_embeddings, tgt_id2word, K)
+                g = 1
+    if g == 1:
+        print "Article not present; related articles:"
+        vectors1 = []
+        words1 = []
+        word2id1 = {}
+        with io.open('wiki.multi.en.vec', 'r', encoding='utf-8', newline='\n', errors='ignore') as f:
+            next(f)
+            for i, line in enumerate(f):
+                word1, vect1 = line.rstrip().split(' ', 1)
+                vect1 = np.fromstring(vect1, sep=' ')
+                assert word1 not in word2id1, 'word found twice'
+                vectors1.append(vect1)
+                words1.append(word1)
+                word2id1[word1] = len(word2id1)
+                if len(word2id1) == nmax:
+                    break
+        avg_vect = 0  
+        c = 0 
+        for w in src_word.split(' '):
+            for w2,v2 in zip(words1,vectors1):
+                if w in w2: 
+                    avg_vect = avg_vect + v2
+                    c = c+1
+                    break
+            #print w
+            #print avg_vect
+        avg = avg_vect/c 
+        #print avg
+        t_w = []
+        scores = (tgt_embeddings / np.linalg.norm(tgt_embeddings, 2, 1)[:, None]).dot(avg / np.linalg.norm(avg))
+        k_best = scores.argsort()[-K:][::-1]
+        print k_best
+        for i, idx in enumerate(k_best):
+            print('%.4f - %s' % (scores[idx], tgt_id2word[idx]))
+            t_w.append(tgt_id2word[idx])
+            print t_w
+
+    #Visualize cross lingual embeddings using PCA
+    pca = PCA(n_components=2, whiten=True)  
+    pca.fit(np.vstack([tgt_embeddings]))
+    
     Y = []
     word_labels = []
-    for tw in tgt_words:
-        Y.append(tgt_emb[tgt_word2id[tw]])
+    #Y.append(src_emb[src_word2id[src_words]])
+    #word_labels.append(src_words)
+    for tw in t_w:
+        Y.append(tgt_embeddings[tgt_word2id[tw]])
+        print Y
         word_labels.append(tw)
+        
     # find tsne coords for 2 dimensions
     Y = pca.transform(Y)
     x_coords = Y[:, 0]
@@ -77,25 +134,35 @@ def plot_similar_word(src_words, src_word2id, src_emb, tgt_words, tgt_word2id, t
     #Bokeh visualization
     x = x_coords
     y = y_coords
-    s1 = ColumnDataSource(data = dict(x=x,y=y,names=word_labels)) 
-    p1= figure(plot_width = 1350, plot_height = 600, tools="tap,box_zoom,reset", title="Click to view")
-    p1.circle('x','y',source = s1, alpha = 0.6,size=8)                                     
-    labels1 = LabelSet(x='x', y='y', text='names', level='glyph', text_color = 'red',
-                  x_offset=5, y_offset=5, source=s1, render_mode='canvas')
+    S = ColumnDataSource(data = dict(x=x,y=y,names=word_labels))
+    print S
+    return x,y,word_labels
     
-    url = "https://fr.wikipedia.org/wiki/@names"
-    taptool = p1.select(type=TapTool)
-    taptool.callback = OpenURL(url=url)
-
-    p1.x_range = Range1d(-8,8)
-    p1.y_range = Range1d(-8, 8)
-
-    p1.add_layout(labels1)
-    text_input = TextInput(value="Eg: Australian Football", title="Search for an article: ")
-    layout = row(p1, text_input)
-    show(layout)
+def update(): 
+    x,y,names1 = select_articles()
+    source.data = dict(
+        x=x,
+        y=y,
+        names=names1,
+    )
 
 
-tgt_words = t_w
-plot_similar_word(tgt_words, tgt_word2id, tgt_embeddings, pca)
+controls = [user_query,no_of_articles]
+for control in controls:
+    control.on_change('value', lambda attr, old, new: update())
+
+sizing_mode = 'fixed'  # 'scale_width' also looks nice with this example
+
+inputs = widgetbox(*controls, sizing_mode=sizing_mode)
+l = layout([
+    [inputs, p1],
+], sizing_mode=sizing_mode)
+
+update() 
+
+
+curdoc().add_root(l)
+curdoc().title = "Movies"
+
+
 
