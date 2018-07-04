@@ -7,8 +7,8 @@ import os
 import argparse
 import numpy as np
 import io
-import bokeh.plotting as bp
 from sklearn.manifold import TSNE
+import bokeh.plotting as bp
 from bokeh.plotting import save
 from bokeh.models import HoverTool
 from bokeh.models import ColumnDataSource, LabelSet, Label, CustomJS,OpenURL, TapTool
@@ -135,7 +135,7 @@ print "writing to file..."
 
 #sentence vectors to file
 X_stack = np.vstack(X)               #vstack for output to file 
-with open('fr_titles.vec','a') as f:       #ar_titles.vec
+with open('french_titles.vec','a') as f:       #ar_titles.vec
     for t1,x1 in zip(X_title,X_stack):
         f.write(t1.encode("utf-8"))
         f.write('~')
@@ -169,3 +169,11 @@ taptool.callback = OpenURL(url=url)
 
 p1.add_layout(labels1)
 show(p1)
+
+
+
+                 
+
+       
+    
+
