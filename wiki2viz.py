@@ -1,168 +1,179 @@
 # -*- coding: utf-8 -*-
-import io
+
+import xml.etree.ElementTree as ET
+import codecs
+import re
+import os
+import argparse
 import numpy as np
+import io
+from sklearn.manifold import TSNE
+import bokeh.plotting as bp
+from bokeh.plotting import save
+from bokeh.models import HoverTool
+from bokeh.models import ColumnDataSource, LabelSet, Label, CustomJS,OpenURL, TapTool
 from bokeh.plotting import figure, output_file, show
-from bokeh.models import ColumnDataSource, LabelSet, Label, CustomJS, OpenURL, TapTool, Range1d, HoverTool
-from bokeh.plotting import figure, output_file, show
-from bokeh.layouts import layout, widgetbox, row
-from bokeh.models.widgets import TextInput, Slider
 from sklearn.decomposition import PCA
+from sklearn import manifold
 
-from bokeh.io import curdoc
 
-output_file("DocRetrieval.html")
+output_file("sentence_embeddings_fr.html")
 
-def load_vec(emb_path, nmax=50000):
-    vectors = []
-    word2id = {}
-    with io.open(emb_path, 'r', encoding='utf-8', newline='\n', errors='ignore') as f:
-        next(f)
-        for i, line in enumerate(f):
-            word, vect = line.rstrip().split('~', 1)
-            vect = np.fromstring(vect, sep=' ')
-            assert word not in word2id, 'word found twice'
-            vectors.append(vect)
-            word2id[word] = len(word2id)
-            if len(word2id) == nmax:
+def is_ascii(s):
+    return all(ord(c) < 128 for c in s)
+
+
+tree = ET.parse('frwiki.xml')          #arwiki.xml for arabic
+root = tree.getroot()
+
+articles_and_titles = []
+titles = []
+for i,page in enumerate(root.findall('{http://www.mediawiki.org/xml/export-0.10/}page')):
+    for p in page:  
+        if p.tag == "{http://www.mediawiki.org/xml/export-0.10/}title":
+            article_title = p.text 
+            if not article_title == None: 
+                article_title = re.sub(r"\"|\#|\~"," ",article_title)
+            print article_title
+        if p.tag == "{http://www.mediawiki.org/xml/export-0.10/}revision":
+            for x in p:
+                if x.tag == "{http://www.mediawiki.org/xml/export-0.10/}text":                    
+                    article_txt = x.text
+                    if not article_txt == None:                                                
+                        article_txt = article_txt[ : article_txt.find("==")]
+                        article_txt = re.sub(r"{{.*}}","",article_txt)
+                        article_txt = re.sub(r"\[\[Fichier:.*\]\]","",article_txt)    #article_txt = re.sub(r"\[\[ملف:.*\]\]","",article_txt)
+                        article_txt = re.sub(r"\[\[Média:.*\]\]","",article_txt)      #article_txt = re.sub(r"\[\[ميديا:.*\]\]","",article_txt)
+                        article_txt = re.sub(r"\n: \'\'.*","",article_txt)
+                        article_txt = re.sub(r"\n!.*","",article_txt)
+                        article_txt = re.sub(r"^:\'\'.*","",article_txt)
+                        article_txt = re.sub(r"&nbsp","",article_txt)
+                        article_txt = re.sub(r"http\S+","",article_txt)
+                        article_txt = re.sub(r"\d+","",article_txt)   
+                        article_txt = re.sub(r"\(.*\)","",article_txt)
+                        article_txt = re.sub(r"Catégorie:.*","",article_txt)         #article_txt = re.sub(r"التصنيف:.*","",article_txt) and article_txt = re.sub(r"ويكيبيديا:.*","",article_txt)
+                        article_txt = re.sub(r"\| .*","",article_txt)
+                        article_txt = re.sub(r"\n\|.*","",article_txt)
+                        article_txt = re.sub(r"\n \|.*","",article_txt)
+                        article_txt = re.sub(r".* \|\n","",article_txt)
+                        article_txt = re.sub(r".*\|\n","",article_txt)
+                        article_txt = re.sub(r"{{Infobox.*","",article_txt)
+                        article_txt = re.sub(r"{{infobox.*","",article_txt)
+                        article_txt = re.sub(r"{{taxobox.*","",article_txt)
+                        article_txt = re.sub(r"{{Taxobox.*","",article_txt)
+                        article_txt = re.sub(r"{{ Infobox.*","",article_txt)
+                        article_txt = re.sub(r"{{ infobox.*","",article_txt)
+                        article_txt = re.sub(r"{{ taxobox.*","",article_txt)
+                        article_txt = re.sub(r"{{ Taxobox.*","",article_txt)
+                        article_txt = re.sub(r"\* .*","",article_txt)
+                        article_txt = re.sub(r"<.*>","",article_txt)
+                        article_txt = re.sub(r"\n","",article_txt)  
+                        article_txt = re.sub(r"\!|\"|\#|\$|\%|\&|\'|\(|\)|\*|\+|\,|\-|\.|\/|\:|\;|\<|\=|\>|\?|\@|\[|\\|\]|\^|\_|\`|\{|\||\}|\~"," ",article_txt)
+                        article_txt = re.sub(r" +"," ",article_txt)
+                        title_and_text = ' '.join([article_title,article_txt])
+                        if not article_txt == None and not article_txt == "" and len(article_txt) > 100:
+                            articles_and_titles.append(title_and_text)      #list having titles and article text
+                            titles.append(article_title)
+
+l = articles_and_titles[:10000]                 
+t = titles[:10000] 
+T = []
+L = []
+for t0,l0 in zip(t,l):            #no duplicate titles (hence articles) created
+    if t0 not in T:
+        T.append(t0)
+        L.append(l0)
+
+print len(T)
+print len(L)
+print "Computing vectors:"
+              
+#computing average of word vectors obtained with fasttext
+nmax = 500000
+vectors = []
+word2id = {}
+words = []
+with io.open('wiki.multi.fr.vec', 'r', encoding='utf-8', newline='\n', errors='ignore') as f:        #wiki.multi.ar.vec for arabic
+    next(f)
+    for i, line in enumerate(f):
+        word, vect = line.rstrip().split(' ', 1)
+        vect = np.fromstring(vect, sep=' ')
+        assert word not in word2id, 'word found twice'
+        vectors.append(vect)
+        words.append(word)
+        word2id[word] = len(word2id)
+        if len(word2id) == nmax:
+            break
+X = []
+X_title = []
+i = 0
+for entry,titles in zip(L,T):
+    TITLE = titles
+    titles = titles.replace('(','')              #remove "()","-",":" and convert to lowercase
+    titles= titles.replace(')','')
+    titles= titles.replace('-',' ')
+    titles= titles.replace(':',' ')
+    word_list = titles.strip().split(' ')
+    avg_vect = 0
+    flag = 0
+    for w in word_list:
+        for w1,v1 in zip(words,vectors):
+            if w1 == w.lower(): 
+                avg_vect = avg_vect + v1
+                flag = 1
                 break
-    id2word = {v: k for k, v in word2id.items()}
-    embeddings = np.vstack(vectors)
-    return embeddings, id2word, word2id
+    avg = avg_vect/len(word_list)          #avg for one article (entry)
+    i = i+1
+    #print i 
+    #print avg
+    #print TITLE
+    if flag!=0:             #if avg not computed for an article (i.e =0) then ignore article and title
+        X.append(avg)
+        X_title.append(TITLE)
+
+print "writing to file..."
+
+#sentence vectors to file
+X_stack = np.vstack(X)               #vstack for output to file 
+with open('french_titles.vec','a') as f:       #ar_titles.vec
+    for t1,x1 in zip(X_title,X_stack):
+        f.write(t1.encode("utf-8"))
+        f.write('~')
+        for x in x1:
+            f.write('%s' %x)
+            f.write(' ')
+        f.write('\n')
+
+print "performing tsne reduction..."
+#dimensionality reduction using tsne
+tSNE = manifold.TSNE(n_components = 2)
+tSNE_data = tSNE.fit_transform(X)
 
 
-src_path = 'eng_titles.vec' 
-tgt_path = 'french_titles.vec'
-nmax = 50000  # maximum number of word embeddings to load
+#plotting tSNE_data using Bokeh 
+x = [tSNE_data[i][0] for i in range(len(tSNE_data))]
+y = [tSNE_data[j][1] for j in range(len(tSNE_data))]
 
-src_embeddings, src_id2word, src_word2id = load_vec(src_path, nmax)
-tgt_embeddings, tgt_id2word, tgt_word2id = load_vec(tgt_path, nmax)
+s1 = ColumnDataSource(data = dict(x=x,y=y,names=X_title))
+p1= figure(plot_width = 1300, plot_height = 1000, tools="tap", title="Click to view")
+p1.circle('x','y',source = s1, alpha = 0.6,size = 7)
+labels1 = LabelSet(x='x', y='y', text='names', level='glyph',
+                  x_offset=5, y_offset=5, source=s1, render_mode='canvas')
 
 
-user_query = TextInput(value = 'football', title="Search for an article: ")
-no_of_articles = Slider(title="Number of articles", start=1, end=50, value=3, step=1)
 
-source = ColumnDataSource(data = dict(x=[],y=[],names=[])) 
-hover = HoverTool(
-        tooltips=[
-            ("Title", "@names"),
-        ]
-)
-p1= figure(plot_width = 1200, plot_height = 600, tools=[hover,'tap','reset','box_zoom'], title="Click to view")
-p1.circle('x','y',source = source, alpha = 0.6,size=8, color = 'red')  
-
-url = "https://fr.wikipedia.org/wiki/@names"
+url = "https://fr.wikipedia.org/wiki/@names"          #https://ar.wikipedia.org/wiki/@names
 taptool = p1.select(type=TapTool)
 taptool.callback = OpenURL(url=url)
 
-p1.x_range = Range1d(-10,10)
-p1.y_range = Range1d(-10, 10)
-# p1.add_layout(labels1)
-#layout = row(p1, user_query)
-#show(layout)  
 
-def select_articles():
-    s_w = " "
-    g = 1
-    K = no_of_articles.value
-    u = user_query.value
-    src_word = u.encode('utf-8')
-    src_word = src_word.lower()
-    src_word = src_word.replace('–',' ')
-    src_word = src_word.replace('-',' ')
-    with open('eng_titles.vec', 'r') as f:
-        for line in f:
-            word1 = line.rstrip().split('~')
-            w = word1[0]
-            if src_word in w:
-                #get_nn(w, src_embeddings, src_id2word, tgt_embeddings, tgt_id2word, K)
-                g = 1
-    if g == 1:
-        print "Article not present; related articles:"
-        vectors1 = []
-        words1 = []
-        word2id1 = {}
-        with io.open('wiki.multi.en.vec', 'r', encoding='utf-8', newline='\n', errors='ignore') as f:
-            next(f)
-            for i, line in enumerate(f):
-                word1, vect1 = line.rstrip().split(' ', 1)
-                vect1 = np.fromstring(vect1, sep=' ')
-                assert word1 not in word2id1, 'word found twice'
-                vectors1.append(vect1)
-                words1.append(word1)
-                word2id1[word1] = len(word2id1)
-                if len(word2id1) == nmax:
-                    break
-        avg_vect = 0  
-        c = 0 
-        for w in src_word.split(' '):
-            for w2,v2 in zip(words1,vectors1):
-                if w in w2: 
-                    avg_vect = avg_vect + v2
-                    c = c+1
-                    break
-            #print w
-            #print avg_vect
-        avg = avg_vect/c 
-        #print avg
-        t_w = []
-        scores = (tgt_embeddings / np.linalg.norm(tgt_embeddings, 2, 1)[:, None]).dot(avg / np.linalg.norm(avg))
-        k_best = scores.argsort()[-K:][::-1]
-        print k_best
-        for i, idx in enumerate(k_best):
-            print('%.4f - %s' % (scores[idx], tgt_id2word[idx]))
-            t_w.append(tgt_id2word[idx])
-            print t_w
+p1.add_layout(labels1)
+show(p1)
 
-    #Visualize cross lingual embeddings using PCA
-    pca = PCA(n_components=2, whiten=True)  
-    pca.fit(np.vstack([tgt_embeddings]))
+
+
+                 
+
+       
     
-    Y = []
-    word_labels = []
-    #Y.append(src_emb[src_word2id[src_words]])
-    #word_labels.append(src_words)
-    for tw in t_w:
-        Y.append(tgt_embeddings[tgt_word2id[tw]])
-        print Y
-        word_labels.append(tw)
-        
-    # find tsne coords for 2 dimensions
-    Y = pca.transform(Y)
-    x_coords = Y[:, 0]
-    y_coords = Y[:, 1]
-
-    #Bokeh visualization
-    x = x_coords
-    y = y_coords
-    S = ColumnDataSource(data = dict(x=x,y=y,names=word_labels))
-    print S
-    return x,y,word_labels
-    
-def update(): 
-    x,y,names1 = select_articles()
-    source.data = dict(
-        x=x,
-        y=y,
-        names=names1,
-    )
-
-
-controls = [user_query,no_of_articles]
-for control in controls:
-    control.on_change('value', lambda attr, old, new: update())
-
-sizing_mode = 'fixed'  # 'scale_width' also looks nice with this example
-
-inputs = widgetbox(*controls, sizing_mode=sizing_mode)
-l = layout([
-    [inputs, p1],
-], sizing_mode=sizing_mode)
-
-update() 
-
-
-curdoc().add_root(l)
-curdoc().title = "Movies"
-
-
 
