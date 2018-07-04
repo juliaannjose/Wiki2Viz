@@ -23,7 +23,7 @@ def is_ascii(s):
     return all(ord(c) < 128 for c in s)
 
 
-tree = ET.parse('frwiki.xml')          #arwiki.xml for arabic
+tree = ET.parse('data/frwiki.xml')          #arwiki.xml for arabic
 root = tree.getroot()
 
 articles_and_titles = []
@@ -93,7 +93,7 @@ nmax = 500000
 vectors = []
 word2id = {}
 words = []
-with io.open('wiki.multi.fr.vec', 'r', encoding='utf-8', newline='\n', errors='ignore') as f:        #wiki.multi.ar.vec for arabic
+with io.open('data/wiki.multi.fr.vec', 'r', encoding='utf-8', newline='\n', errors='ignore') as f:        #wiki.multi.ar.vec for arabic
     next(f)
     for i, line in enumerate(f):
         word, vect = line.rstrip().split(' ', 1)
@@ -135,7 +135,7 @@ print "writing to file..."
 
 #sentence vectors to file
 X_stack = np.vstack(X)               #vstack for output to file 
-with open('french_titles.vec','a') as f:       #ar_titles.vec
+with open('results/french_titles.vec','a') as f:       #ar_titles.vec
     for t1,x1 in zip(X_title,X_stack):
         f.write(t1.encode("utf-8"))
         f.write('~')
