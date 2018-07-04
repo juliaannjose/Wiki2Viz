@@ -30,8 +30,8 @@ def load_vec(emb_path, nmax=50000):
     return embeddings, id2word, word2id
 
 
-src_path = 'eng_titles.vec' 
-tgt_path = 'french_titles.vec'            #ar_titles.vec for arabic
+src_path = 'results/eng_titles.vec' 
+tgt_path = 'results/french_titles.vec'            #ar_titles.vec for arabic
 nmax = 50000  # maximum number of word embeddings to load
 
 src_embeddings, src_id2word, src_word2id = load_vec(src_path, nmax)
@@ -67,7 +67,7 @@ def select_articles():
     src_word = src_word.lower()
     src_word = src_word.replace('–',' ')
     src_word = src_word.replace('-',' ')
-    with open('eng_titles.vec', 'r') as f:
+    with open('results/eng_titles.vec', 'r') as f:
         for line in f:
             word1 = line.rstrip().split('~')
             w = word1[0]
@@ -78,7 +78,7 @@ def select_articles():
         vectors1 = []
         words1 = []
         word2id1 = {}
-        with io.open('wiki.multi.en.vec', 'r', encoding='utf-8', newline='\n', errors='ignore') as f:
+        with io.open('data/wiki.multi.en.vec', 'r', encoding='utf-8', newline='\n', errors='ignore') as f:
             next(f)
             for i, line in enumerate(f):
                 word1, vect1 = line.rstrip().split(' ', 1)
