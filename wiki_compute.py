@@ -7,8 +7,8 @@ import os
 import argparse
 import numpy as np
 import io
-from sklearn.manifold import TSNE
 import bokeh.plotting as bp
+from sklearn.manifold import TSNE
 from bokeh.plotting import save
 from bokeh.models import HoverTool
 from bokeh.models import ColumnDataSource, LabelSet, Label, CustomJS,OpenURL, TapTool
