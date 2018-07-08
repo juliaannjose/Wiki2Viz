@@ -38,17 +38,19 @@ src_embeddings, src_id2word, src_word2id = load_vec(src_path, nmax)
 tgt_embeddings, tgt_id2word, tgt_word2id = load_vec(tgt_path, nmax)
 
 
-user_query = TextInput(value = 'football', title="Search for an article: ")
+user_query = TextInput(value = 'medicine', title="Search for an article: ")
 no_of_articles = Slider(title="Number of articles", start=1, end=50, value=5, step=1)
 
-source = ColumnDataSource(data = dict(x=[],y=[],names=[])) 
+source = ColumnDataSource(data = dict(x=[],y=[],names=[],size=[])) 
 hover = HoverTool(
         tooltips=[
             ("Title", "@names"),
         ]
 )
 p1= figure(plot_width = 950, plot_height = 600, tools=[hover,'tap','reset','box_zoom'], title="Click to view")
-p1.circle('x','y',source = source, alpha = 0.6,size=9, color = 'red')  
+p1.circle('x','y',source = source, alpha = 0.6,size='size', color = 'blue')  
+labels1 = LabelSet(x='x', y='y', text='names', level='glyph', text_color = 'blue',
+                  x_offset=5, y_offset=5, source=source, render_mode='canvas')
 
 url = "https://fr.wikipedia.org/wiki/@names"       #https://ar.wikipedia.org/wiki/@names
 taptool = p1.select(type=TapTool)
@@ -56,6 +58,7 @@ taptool.callback = OpenURL(url=url)
 
 p1.x_range = Range1d(-8,8)
 p1.y_range = Range1d(-8,8)
+p1.add_layout(labels1)
 
 
 def select_articles():
@@ -99,10 +102,12 @@ def select_articles():
                     break
         avg = avg_vect/c 
         t_w = []
+        k_size = []
         scores = (tgt_embeddings / np.linalg.norm(tgt_embeddings, 2, 1)[:, None]).dot(avg / np.linalg.norm(avg))
         k_best = scores.argsort()[-K:][::-1]
         for i, idx in enumerate(k_best):
             print('%.4f - %s' % (scores[idx], tgt_id2word[idx]))
+            k_size.append(scores[idx])
             t_w.append(tgt_id2word[idx])
 
     #Visualize cross lingual embeddings using PCA
@@ -125,14 +130,21 @@ def select_articles():
     y = y_coords
     S = ColumnDataSource(data = dict(x=x,y=y,names=word_labels))
     print "====================================="
-    return x,y,word_labels
+    k = len(k_size)*4
+    k_s = []
+    for i in k_size:
+        l = k*i
+        k_s.append(l)
+        k = k-3
+    return x,y,word_labels,k_s
     
 def update(): 
-    x,y,names1 = select_articles()
+    x,y,names1,sz = select_articles()
     source.data = dict(
         x=x,
         y=y,
         names=names1,
+        size=sz,
     )
 
 
