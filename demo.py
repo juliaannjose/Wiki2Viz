@@ -31,7 +31,8 @@ def load_vec(emb_path, nmax=50000):
 
 
 src_path = 'results/eng_titles.vec' 
-tgt_path = 'results/french_titles.vec'            #ar_titles.vec for arabic
+tgt_path = 'results/fr_titles.vec'            #ar_titles.vec for arabic
+
 nmax = 50000  # maximum number of word embeddings to load
 
 src_embeddings, src_id2word, src_word2id = load_vec(src_path, nmax)
