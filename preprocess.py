@@ -9,7 +9,7 @@ def is_ascii(s):
     return all(ord(c) < 128 for c in s)
 
 
-tree = ET.parse('data/frwiki_1.xml')
+tree = ET.parse('data/frwiki.xml')     #data/arwiki.xml
 root = tree.getroot()
 
 articles = []
@@ -29,8 +29,8 @@ for i,page in enumerate(root.findall('{http://www.mediawiki.org/xml/export-0.10/
                     if not article_txt == None:                                                
                         article_txt = article_txt[ : article_txt.find("==")]
                         article_txt = re.sub(r"{{.*}}","",article_txt)
-                        article_txt = re.sub(r"\[\[Fichier:.*\]\]","",article_txt)
-                        article_txt = re.sub(r"\[\[Média:.*\]\]","",article_txt)
+                        article_txt = re.sub(r"\[\[Fichier:.*\]\]","",article_txt)    #article_txt = re.sub(r"\[\[ملف:.*\]\]","",article_txt)
+                        article_txt = re.sub(r"\[\[Média:.*\]\]","",article_txt)      #article_txt = re.sub(r"\[\[ميديا:.*\]\]","",article_txt)
                         article_txt = re.sub(r"\n: \'\'.*","",article_txt)
                         article_txt = re.sub(r"\n!.*","",article_txt)
                         article_txt = re.sub(r"^:\'\'.*","",article_txt)
@@ -38,7 +38,7 @@ for i,page in enumerate(root.findall('{http://www.mediawiki.org/xml/export-0.10/
                         article_txt = re.sub(r"http\S+","",article_txt)
                         article_txt = re.sub(r"\d+","",article_txt)   
                         article_txt = re.sub(r"\(.*\)","",article_txt)
-                        article_txt = re.sub(r"Catégorie:.*","",article_txt)
+                        article_txt = re.sub(r"Catégorie:.*","",article_txt)     #article_txt = re.sub(r"التصنيف:.*","",article_txt) and article_txt = re.sub(r"ويكيبيديا:.*","",article_txt)
                         article_txt = re.sub(r"\| .*","",article_txt)
                         article_txt = re.sub(r"\n\|.*","",article_txt)
                         article_txt = re.sub(r"\n \|.*","",article_txt)
