@@ -21,7 +21,7 @@ nmax = 500000
 vectors = []
 word2id = {}
 words = []
-with io.open('data/wiki.multi.fr.vec', 'r', encoding='utf-8', newline='\n', errors='ignore') as f:
+with io.open('data/wiki.multi.fr.vec', 'r', encoding='utf-8', newline='\n', errors='ignore') as f:  #data/wiki.multi.ar.vec for arabic
     next(f)
     for i, line in enumerate(f):
         word, vect = line.rstrip().split(' ', 1)
@@ -56,8 +56,8 @@ for titles in T:
 
 print "writing to file..."
 
-X_stack = np.vstack(X)               #vstack for output to file 
-with open('results/fr_titles.vec','a') as f:
+X_stack = np.vstack(X)              
+with open('results/fr_titles.vec','a') as f:     #results/ar_titles.vec for arabic
     for t1,x1 in zip(X_title,X_stack):
         f.write(t1.encode("utf-8"))
         f.write('~')
