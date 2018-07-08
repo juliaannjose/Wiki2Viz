@@ -21,7 +21,6 @@ for i,page in enumerate(root.findall('{http://www.mediawiki.org/xml/export-0.10/
             article_title = p.text 
             if not article_title == None: 
                 article_title = re.sub(r"\"|\#|\~"," ",article_title)
-            #print article_title
         if p.tag == "{http://www.mediawiki.org/xml/export-0.10/}revision":
             for x in p:
                 if x.tag == "{http://www.mediawiki.org/xml/export-0.10/}text":                    
