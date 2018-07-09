@@ -59,16 +59,16 @@ To use the word-similarity evaluation script:
      
 References
   
-  Datasets: https://dumps.wikimedia.org
+   Datasets: https://dumps.wikimedia.org
 
-  Word embeddings generation: https://fasttext.cc/docs/en/unsupervised-tutorial.html
+   Word embeddings generation: https://fasttext.cc/docs/en/unsupervised-tutorial.html
                               https://github.com/facebookresearch/fastText
 
-  Monolingual word embeddings allignment: https://github.com/facebookresearch/MUSE
+   Monolingual word embeddings allignment: https://github.com/facebookresearch/MUSE
 
-  KNN Algorithm: https://www.analyticsvidhya.com/blog/2018/03/introduction-k-neighbours-algorithm-clustering/
+   KNN Algorithm: https://www.analyticsvidhya.com/blog/2018/03/introduction-k-neighbours-algorithm-clustering/
 
-  Visualization:
+   Visualization:
                  http://scikit-learn.org/stable/modules/generated/sklearn.manifold.TSNE.html
                  https://bokeh.pydata.org/en/latest/
                  
