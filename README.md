@@ -1,7 +1,8 @@
 # Wiki2Viz
-### A Multi-lingual Information Retrieval System: a searchable interface for growing collection of multilingual online information.
+
+ A Multi-lingual Information Retrieval System: a searchable interface for growing collection of multilingual online information.
  
- ## Requirements:
+ ## Requirements
  
  For the word-similarity evaluation script you will need:
 
@@ -14,7 +15,7 @@ To run demo.py you will need:
     NumPy, SciPy, Scikit-learn & Bokeh
     
    
-## Usage Instructions:
+## Usage Instructions
 
 ### To use the word-similarity evaluation script:
 
@@ -42,17 +43,17 @@ To run demo.py you will need:
      
      
      
- ### For the 2nd part of this project (Multi-Lingual Information Retrieval):
+ ### To run the demo application (Multi-Lingual Information Retrieval System):
  
-   1. To preprocess the xml file to get the titles:
+   1. Preprocess the xml file to get the titles:
    
      $ python ./preprocess.py
      
-   2. To compute the average of vectors of the words in the title:
+   2. Compute the average of vectors of the words in the title:
     
      $ python ./compute.py
      
-   3. Finally, to run the demo application:
+   3. Finally, run the demo application:
    
      $ bokeh serve demo.py
      
