@@ -20,18 +20,20 @@ To run demo.py you will need:
 ### To use the word-similarity evaluation script:
 
    1. Download the wikipedia data dumps for English, French and Arabic from https://dumps.wikimedia.org/.
-   2. Use fastText to obtain monolingual word vectors from these dump files 
+   2. Use fastText to train monolingual word vectors from these dump files 
    
      $ mkdir data
      $ cd data
      $ wget https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-pages-articles.xml.bz2
      $ bzip2 https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-pages-articles.xml.bz2 -d
-     $ perl wikifil.pl data/enwiki.xml > data/processed
+     $ perl wikifil.pl data/enwiki-latest-pages-articles.xml > data/processed
      $ ./fasttext skipgram -input data/processed -output data/wiki.en
      
    alternatively, use facebook's pretrained word vectors from: https://github.com/facebookresearch/fastText/blob/master/pretrained-vectors.md
+   
+   To learn more about word representations using fasttext, click [here](https://fasttext.cc/docs/en/unsupervised-tutorial.html)
 
-   3. Use MUSE to obtain multi-lingual word vectors 
+   3. Use MUSE to train multi-lingual word vectors 
    
      $ python supervised.py --src_lang en --tgt_lang es --src_emb data/wiki.en.vec --tgt_emb data/wiki.es.vec --n_refinement 5 --dico_train default
      
