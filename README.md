@@ -70,7 +70,8 @@ To run demo.py you will need:
    Datasets: https://dumps.wikimedia.org
 
    Word embeddings generation: https://fasttext.cc/docs/en/unsupervised-tutorial.html
-                              https://github.com/facebookresearch/fastText
+
+https://github.com/facebookresearch/fastText
 
    Monolingual word embeddings allignment: https://github.com/facebookresearch/MUSE
 
@@ -78,7 +79,8 @@ To run demo.py you will need:
 
    Visualization:
                  http://scikit-learn.org/stable/modules/generated/sklearn.manifold.TSNE.html
-                 https://bokeh.pydata.org/en/latest/
+                 
+https://bokeh.pydata.org/en/latest/
                  
                  
 #### Contact: julia.ann.1997@hotmail.com               
