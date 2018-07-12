@@ -12,9 +12,10 @@ def is_ascii(s):
 tree = ET.parse('data/frwiki.xml')     #data/arwiki.xml
 root = tree.getroot()
 
-articles = []
+articles = []  
 titles = []
 
+#parse the xml file to get titles and preprocess it to remove unwanted characters
 for i,page in enumerate(root.findall('{http://www.mediawiki.org/xml/export-0.10/}page')):
     for p in page:  
         if p.tag == "{http://www.mediawiki.org/xml/export-0.10/}title":
