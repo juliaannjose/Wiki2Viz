@@ -12,10 +12,9 @@ from bokeh.io import curdoc
 from os.path import dirname, join
 
 desc = Div(text=open(join(dirname(__file__), "description.html")).read(), width=800)
-output_file("DocRetrieval.html")
 
 
-#load the document vectors obtained from previous steps
+#load the trained title vectors obtained previously
 def load_vec(emb_path, nmax=50000):
     vectors = []
     word2id = {}
@@ -32,6 +31,7 @@ def load_vec(emb_path, nmax=50000):
     id2word = {v: k for k, v in word2id.items()}
     embeddings = np.vstack(vectors)
     return embeddings, id2word, word2id
+
 nmax = 50000  # maximum number of word embeddings to load
 src_path = 'results/eng_titles.vec' 
 tgt_path = 'results/fr_titles.vec'            #ar_titles.vec for arabic
@@ -39,7 +39,8 @@ src_embeddings, src_id2word, src_word2id = load_vec(src_path, nmax)
 tgt_embeddings, tgt_id2word, tgt_word2id = load_vec(tgt_path, nmax)
 
 
-#User interface
+
+#User interface and visualization (using Bokeh)
 user_query = TextInput(value = 'medicine', title="Search for an article: ")
 no_of_articles = Slider(title="Number of articles", start=1, end=50, value=5, step=1)
 source = ColumnDataSource(data = dict(x=[],y=[],names=[],size=[],word_labels_display=[],rank=[])) 
@@ -159,6 +160,7 @@ def update():
     )
     
 
+
 controls = [user_query,no_of_articles,data_table]
 for control in controls: 
     if control != data_table:
@@ -175,4 +177,3 @@ l = layout([
 update()   
 curdoc().add_root(l)
 curdoc().title = "Multi-lingual IR system"
-
