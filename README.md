@@ -19,27 +19,31 @@ To run demo.py you will need:
 
 ### To use the word-similarity evaluation script:
 
-   1. Download the wikipedia data dumps for English, French and Arabic from https://dumps.wikimedia.org/.
-   2. Use fastText to train monolingual word vectors from these dump files 
+   1. Download the wikipedia data dumps for English, French and Arabic from [here](https://dumps.wikimedia.org/)
    
      $ mkdir data
      $ cd data
      $ wget https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-pages-articles.xml.bz2
      $ bzip2 https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-pages-articles.xml.bz2 -d
+     
+   2. A raw Wikipedia dump contains a lot of HTML/XML data. We pre-process it with the wikifil.pl script bundled with fastText:
+   
      $ perl wikifil.pl data/enwiki-latest-pages-articles.xml > data/processed
+     
+   3. Use fastText to train monolingual word vectors from these pre-processed files   
+  
      $ ./fasttext skipgram -input data/processed -output data/wiki.en
      
    alternatively, use facebook's pretrained word vectors from: https://github.com/facebookresearch/fastText/blob/master/pretrained-vectors.md
-   
    To learn more about word representations using fasttext, click [here](https://fasttext.cc/docs/en/unsupervised-tutorial.html)
 
-   3. Use MUSE to train multi-lingual word vectors 
+   4. Use MUSE to train multi-lingual word vectors 
    
      $ python supervised.py --src_lang en --tgt_lang es --src_emb data/wiki.en.vec --tgt_emb data/wiki.es.vec --n_refinement 5 --dico_train default
      
    alternatively, use facebook's supervised word embedding's aligned in a single vector space: https://github.com/facebookresearch/MUSE
      
-   4. Run the word-similarity script to visualize the cross-lingual word embeddings.
+   5. Run the word-similarity script to visualize the cross-lingual word embeddings.
        
      $ python ./word_similarity.py
      
@@ -47,7 +51,7 @@ To run demo.py you will need:
      
  ### To run the demo application (Multi-Lingual Information Retrieval System):
  
-   1. Preprocess the xml file to get the titles:
+   1. Preprocess the xml file (obtained [here](https://github.com/juliajose97/Wiki2Viz/edit/master/README#L27)) to get the titles of the articles:
    
      $ python ./preprocess.py
      
