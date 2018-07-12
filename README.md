@@ -51,7 +51,7 @@ To run demo.py you will need:
      
  ### To run the demo application (Multi-Lingual Information Retrieval System):
  
-   1. Preprocess the xml file (obtained [here](README.md#L27)) to get the titles of the articles:
+   1. Preprocess the xml file (obtained above) to get the titles of the articles:
    
      $ python ./preprocess.py
      
