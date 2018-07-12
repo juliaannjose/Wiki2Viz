@@ -63,16 +63,19 @@ for i,page in enumerate(root.findall('{http://www.mediawiki.org/xml/export-0.10/
 
 T = []
 L = []
-for t0,l0 in zip(titles,articles):            #no duplicate titles (or articles) created
+#to make sure no duplicate titles (or articles) created
+for t0,l0 in zip(titles,articles):            
     if t0 not in T:
         T.append(t0)
         L.append(l0)
 
+#file with pre processed articles
 with open('results/preprocessed_articles.txt','w') as F:
     for articles in L:
         F.write(articles.encode("utf-8"))
         F.write('\n')
 
+#file with pre processed titles
 with open('results/preprocessed_titles.txt','w') as f:
     for titles in T:
         f.write(titles.encode("utf-8"))
