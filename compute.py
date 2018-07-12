@@ -12,11 +12,10 @@ T = []
 f = codecs.open('results/preprocessed_titles.txt', encoding='utf-8')
 for line in f:
     T.append(line)        
-
 T = map(lambda s: s.strip(), T)     #removing '\n' char from list elements
 
 
-#computing average of vectors of titles using word vectors from fasttext
+#computing average of vectors of title words using the trained word vectors obtained previously
 nmax = 500000
 vectors = []
 word2id = {}
@@ -32,11 +31,11 @@ with io.open('data/wiki.multi.fr.vec', 'r', encoding='utf-8', newline='\n', erro
         word2id[word] = len(word2id)
         if len(word2id) == nmax:
             break
-X = []
-X_title = []
+X = []    #X - list with title vectors
+X_title = []    #X_title - list with titles 
 for titles in T:
     TITLE = titles
-    titles = titles.replace('(','')              #remove "()","-",":" and convert to lowercase
+    titles = titles.replace('(','')              #remove "()","-",":" and convert to lowercase before computing the average 
     titles= titles.replace(')','')
     titles= titles.replace('-',' ')
     titles= titles.replace(':',' ')
@@ -54,8 +53,8 @@ for titles in T:
         X.append(avg)
         X_title.append(TITLE)
 
+        
 print "writing to file..."
-
 X_stack = np.vstack(X)              
 with open('results/fr_titles.vec','a') as f:     #results/ar_titles.vec for arabic
     for t1,x1 in zip(X_title,X_stack):
