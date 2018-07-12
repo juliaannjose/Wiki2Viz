@@ -6,12 +6,12 @@
  
  For the word-similarity evaluation script you will need:
 
-    Python version 2.7 or >=3.4
+    Python version 2.7 
     NumPy, SciPy, fastText & MUSE
 
 To run demo.py you will need:
 
-    Python version 2.7 or >=3.4
+    Python version 2.7
     NumPy, SciPy, Scikit-learn & Bokeh
     
    
@@ -36,8 +36,7 @@ To run demo.py you will need:
      
    alternatively, use facebook's pretrained word vectors from: https://github.com/facebookresearch/fastText/blob/master/pretrained-vectors.md
    
-   To learn how to use fasttext (installation), click [here](https://www.analyticsvidhya.com/blog/2017/07/word-representations-text-classification-using-fasttext-nlp-facebook/)
-   To learn more about word representations using fasttext, click [here](https://fasttext.cc/docs/en/unsupervised-tutorial.html)
+   To learn how to use fasttext (installation), click [here](https://www.analyticsvidhya.com/blog/2017/07/word-representations-text-classification-using-fasttext-nlp-facebook/) and to learn more about word representations using fasttext, click [here](https://fasttext.cc/docs/en/unsupervised-tutorial.html)
 
    4. Use MUSE to train multi-lingual word vectors 
    
